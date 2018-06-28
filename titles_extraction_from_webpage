@@ -42,7 +42,7 @@ for result in results:
 df = pd.DataFrame(titles_list, columns=['Title', 'Year', 'Alternative_Title', 'Short_Stories'])
 
 #export DataFrame to csv
-df.to_csv('poirot_titles.csv', index = False)
+df.to_csv('poirot_titles.csv', index=False)
 
 #get extended titles list including titles of short stories
 extended_list = []
@@ -67,4 +67,4 @@ extended_list = extended_list[:last_index]
 df = pd.DataFrame(extended_list, columns=['Title'])
 
 #export DataFrame to csv
-df.to_csv('poirot_extended_titles_list.csv', index = False)
+df.to_csv('poirot_extended_titles_list.txt', index=False, header=False)
