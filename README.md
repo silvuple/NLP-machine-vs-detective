@@ -1,5 +1,5 @@
 ## Text analysis with NLTK
-NLTK book on NLP [https://www.nltk.org/book/]
+[NLTK book on NLP](https://www.nltk.org/book/)
 
 Requirements:
 * Python 3
