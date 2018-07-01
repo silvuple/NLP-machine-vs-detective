@@ -18,15 +18,6 @@ words = [w.lower() for w in tokens if w[0].isalnum()]
 # Create vocabulary list (list of unique words).
 vocab = sorted(set(words))
 
-# Break text to sentences list.
-sentences = sent_tokenize(raw)
-
-# Create tokenized sentences list (list of lists of lists).
-sentences = [word_tokenize(sent) for sent in sentences]
-
-# Add Part-of-Speach tagging to tokenized sentences.
-sentences = [pos_tag(sent) for sent in sentences]
-
 # Create Frequency Distribution obejct.
 fdist = FreqDist(words)
 
@@ -73,3 +64,27 @@ collocations = find_collocations(tokens, 40)
 
 # Draw lexical dispersion plot for below words.
 dispersion_plot(tokens, ['Poirot', 'Hastings', 'Cavendish'])
+
+# Break text to sentences list.
+sentences = sent_tokenize(raw)
+
+# Create tokenized sentences list (list of lists of lists).
+sentences = [word_tokenize(sent) for sent in sentences]
+
+# Add Part-of-Speach tagging to tokenized sentences.
+sentences = [pos_tag(sent) for sent in sentences]
+
+# Get named entities from tagged sentences.
+chunked_sents = ne_chunk_sents(sentences)
+
+# Get all chunks labeled 'PERSON'.
+persons = []
+for tree in chunked_sents:
+    for chunk in tree:
+        if hasattr(chunk, 'label') and chunk.label() == 'PERSON':
+            persons.append(' '.join(w[0] for w in chunk))
+
+# Remove named entities that appear only once in text.
+persons = [person for person in persons if persons.count(person) > 1]
+
+print(set(persons))
