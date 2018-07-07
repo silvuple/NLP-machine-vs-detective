@@ -19,30 +19,15 @@ class NovelText:
     """
 
     def __init__(self, raw):
-        """Constructs a NovelText from text raw string."""
+        """Construct a NovelText from text raw string."""
         self.raw = raw
         self.tokens = word_tokenize(raw)
         self.sentences = sent_tokenize(raw)
-
-
-    def get_words(self):
-        """Gets only words (tokens that start with an alphanumeric character)
-        from tokens by filtering out all the puntruation marks.
-        """
-        self.words = [w.lower() for w in self.tokens if w[0].isalnum()]
-        return self.words
-
-
-    def get_vocab(self):
-        """Returns vocabulary of the text by geting all the unique words."""
-        self.vocab = sorted(set(self.words))
-        return self.vocab
 
         
     @staticmethod
     def _reverse_to_raw(tokens):
         import re
-        substrings = []
         raw = ' '.join(tokens)
         # Remove whitespace before punctutation marks.
         raw = re.sub(r"""\s            # whitespace
@@ -60,14 +45,28 @@ class NovelText:
 
     @classmethod
     def from_tokens(cls, tokens):
-        """Constructs a NovelText from list of tokens (list of strings
+        """Construct a NovelText from list of tokens (list of strings
         of words and punctuation marks).
         """
         return cls(cls._reverse_to_raw(tokens))
 
 
-    def find_collocations(self, num=20):
-        """Returns collocations derived from tokens, ignoring stopwords.
+    def get_words(self):
+        """Get only words (tokens that start with an alphanumeric character)
+        from tokens by filtering out all the puntruation marks.
+        """
+        words = [w.lower() for w in self.tokens if w[0].isalnum()]
+        return words
+
+
+    def get_vocab(self):
+        """Return vocabulary of the text by geting all the unique words."""
+        vocab = sorted(set(self.get_words()))
+        return vocab
+
+    
+    def get_collocations(self, num=20):
+        """Return collocations derived from tokens, ignoring stopwords.
         Collocations are returned as a list of tuples.
         Parameter num: The maximum number of collocations to return
         """
@@ -77,45 +76,51 @@ class NovelText:
         finder.apply_freq_filter(2)
         # Get only those bigrams that inlcude words longer than 2 characters
         # and are not common english 'stopwords'.
-        finder.apply_word_filter(lambda w: len(w) < 3 or w.lower() in ignored_words)
+        finder.apply_word_filter(lambda w: len(w)<3 or
+                                 w.lower() in ignored_words)
         collocations = finder.nbest(BigramAssocMeasures.likelihood_ratio, num)
         return collocations
 
 
-    def get_persons(self):
-        """Returns a sorted list of all the characteres (person names)
-        which appear at least twice in the the text.
+    def get_all_ne_persons(self):
+        """Return a list of all person names mentioned at least twice 
+        in the the text.
         """
         # Create tokenized sentences list (list of lists of lists).
         sents = [word_tokenize(sent) for sent in self.sentences]
         # Add Part-of-Speach tagging to tokenized sentences.
         sents = [pos_tag(sent) for sent in sents]
         # Get named entities from tagged sentences.
-        self.chunked_sents = ne_chunk_sents(sents)
+        chunked_sents = ne_chunk_sents(sents)
         # Get all named entities with label 'PERSON'.
-        self.all_persons = []
-        for tree in self.chunked_sents:
+        all_persons = []
+        for tree in chunked_sents:
             for chunk in tree:
                 if hasattr(chunk, 'label') and chunk.label() == 'PERSON':
-                    self.all_persons.append(' '.join(w[0] for w in chunk))
+                    all_persons.append(' '.join(w[0] for w in chunk))
+        return all_persons
+
+    
+    def get_persons(self):
+        """Return a sorted list of all the characteres (person names)
+        which appear at least twice in the the text.
+        """
         # Remove named entities that appear only once in text.
-        self.all_persons = [person for person in self.all_persons
-                        if self.all_persons.count(person) > 1]
+        persons = [person for person in self.get_all_ne_persons()
+                   if self.get_all_ne_persons().count(person)>1]
         # Get unqiue persons sorted alphabetically.
-        self.persons = sorted(set(self.all_persons))            
-        return self.persons
+        persons = sorted(set(persons))            
+        return persons
 
 
     def get_persons_count(self):
-        """Returns a dictionary with count of every person in the list."""
-        self.persons_count = {person: self.all_persons.count(person) for
-                              person in self.all_persons}
-        return(self.persons_count)
+        """Return a dictionary with count of every person in the list."""
+        all_persons = self.get_all_ne_persons()
+        persons_count = {person: all_persons.count(person) for
+                              person in all_persons}
+        return(persons_count)
 
 
     def get_name_count(self, name):
-        """Returns integer number of times a name appears in the raw text."""
+        """Return integer number of times a name appears in the raw text."""
         return self.raw.count(name)
-
-
-
