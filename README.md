@@ -10,4 +10,6 @@ Requirements:
 
 Objectives:
 * Analyse text using NLTK techniques
-* Create ML model for prediction
+* Extract character names from mystery novel
+* Create a set of features per chacacter
+* Create ML model for prediction of a guilty person
