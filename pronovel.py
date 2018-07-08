@@ -7,7 +7,6 @@ from nltk.collocations import BigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
 from nltk.corpus import words, stopwords
 
-
 class NovelText:
     """NovelText class for analysing a text of a mystery novel.
 
@@ -24,21 +23,21 @@ class NovelText:
         self.tokens = word_tokenize(raw)
         self.sentences = sent_tokenize(raw)
 
-        
+
     @staticmethod
     def _reverse_to_raw(tokens):
         import re
         raw = ' '.join(tokens)
         # Remove whitespace before punctutation marks.
-        raw = re.sub(r"""\s            # whitespace
-                         (             # start of group '\1':
-                         [])}!?:;.,]   # any one punctuation mark
-                         (?:\s|$)      # whitespace or end-of-string
-                         )             # end of group '\1'""",
+        raw = re.sub(r"""\s           # whitespace
+                         (            # start of group '\1':
+                         [])}!?:;.,]  # any one punctuation mark
+                         (?:\s|$)     # whitespace or end-of-string
+                         )            # end of group '\1'""",
                      r"\1", raw, flags=re.VERBOSE)
         # Remove whitespace between opening parenthesis and next word.
-        raw = re.sub(r"""([[({])       # any one of opening parenthesis
-                         \s            # whitespace""",
+        raw = re.sub(r"""([[({])      # any one of opening parenthesis
+                         \s           # whitespace""",
                      r"\1", raw, flags=re.VERBOSE)
         return raw
 
@@ -64,7 +63,7 @@ class NovelText:
         vocab = sorted(set(self.get_words()))
         return vocab
 
-    
+
     def get_collocations(self, num=20):
         """Return collocations derived from tokens, ignoring stopwords.
         Collocations are returned as a list of tuples.
@@ -100,7 +99,7 @@ class NovelText:
                     all_persons.append(' '.join(w[0] for w in chunk))
         return all_persons
 
-    
+
     def get_persons(self):
         """Return a sorted list of all the characteres (person names)
         which appear at least twice in the the text.
