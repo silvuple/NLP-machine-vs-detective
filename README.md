@@ -8,8 +8,16 @@ Requirements:
 * Pandas
 * Sklearn
 
+Goal:
+Predict the guilty person in a mystery novel.
+Features set: character name, count, gender, etc.
+Label: innocent/guilty.
+
+Data:
+Mystery novels texts in txt format (UTF-8 encoded).
+
 Objectives:
 * Analyse text using NLTK techniques
-* Extract character names from mystery novel
+* Extract character names 
 * Create a set of features per chacacter
 * Create ML model for prediction of a guilty person
