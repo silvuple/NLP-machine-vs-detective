@@ -5,7 +5,8 @@ from nltk.probability import FreqDist, ConditionalFreqDist
 from nltk.draw import dispersion_plot
 from nltk.collocations import BigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
-from nltk.corpus import words, stopwords
+from nltk.corpus import words, stopwords, names
+
 
 class NovelText:
     """NovelText class for analysing a text of a mystery novel.
@@ -96,18 +97,17 @@ class NovelText:
         for tree in chunked_sents:
             for chunk in tree:
                 if hasattr(chunk, 'label') and chunk.label() == 'PERSON':
-                    all_persons.append(' '.join(w[0] for w in chunk))
+                    all_persons.append(tuple(w[0] for w in chunk))
         return all_persons
 
 
     def get_persons(self):
         """Return a sorted list of all the characteres (person names)
-        which appear at least twice in the the text.
+        which appear more than once in the the text.
         """
-        # Remove named entities that appear only once in text.
-        persons = [person for person in self.get_all_ne_persons()
-                   if self.get_all_ne_persons().count(person)>1]
-        # Get unqiue persons sorted alphabetically.
+        all_persons = self.get_all_ne_persons()
+        persons = [person for person in all_persons
+                   if all_persons.count(person) > 1]
         persons = sorted(set(persons))            
         return persons
 
@@ -116,10 +116,34 @@ class NovelText:
         """Return a dictionary with count of every person in the list."""
         all_persons = self.get_all_ne_persons()
         persons_count = {person: all_persons.count(person) for
-                              person in all_persons}
+                              person in self.get_persons()}
         return(persons_count)
 
 
-    def get_name_count(self, name):
-        """Return integer number of times a name appears in the raw text."""
-        return self.raw.count(name)
+    def get_persons_gender(self):
+        """Return a dictionary with gender of every person in the list."""
+        persons = self.get_persons()
+        male_names = [name for name in names.words('male.txt')]
+        female_names = [name for name in names.words('female.txt')]
+        male_titles = ['Mr.', 'Monsieur', 'Captain', 'Uncle', 'Dr.', 'Doctor',
+                       'Sir', 'Papa', 'Father']
+        female_titles = ['Miss', 'Mrs.', 'Mademoiselle', 'Aunt', 'Sister']
+        persons_gender = {}
+        for person in persons:
+            gender = 'unknown'
+            if person[0] in male_titles:
+                gender = 'male'
+            elif person[0] in female_titles:
+                gender = 'female'
+            else:
+                for word in person:
+                    if word in male_names:
+                        gender = 'male'
+                    elif word in female_names:
+                        gender = 'female'
+            persons_gender[person] = gender
+        return persons_gender
+                    
+
+        
+    

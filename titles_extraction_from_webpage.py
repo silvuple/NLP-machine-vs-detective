@@ -14,7 +14,7 @@ r = get(url)
 soup = BeautifulSoup(r.text, 'html.parser')
 
 # find all listed book titles 
-results = soup.ol.find_all('li') #, attrs={'class': "lister-item mode-detail"})
+results = soup.ol.find_all('li')
 
 # iterate over the results list and extract data
 for result in results:
@@ -22,27 +22,22 @@ for result in results:
     title = result.i.text
 
     # get publication year
-    year = re.search('\d{4}', result.text)
+    year = re.search(r'\d{4}', result.text)
     year = year.group()
 
-    # get alternative title if exists
-    # and mark as 'Y' if title is a 'short stories collection'
-    alt_title = ''
+    # mark if 'short stories collection' s(ss)
     short_stories = ''
-    for sibling in result.i.find_next_siblings('i'):
-        if sibling.text == 'ss':
-            short_stories = 'Y'
-        else:
-            alt_title = sibling.text
-            
+    if re.search(r'\(\d{4},\s(<i>)*ss(<i>)*\)', result.text):
+        short_stories = 'Y'
+        
     # add (title, year, alt_title, short_stories) to the list
-    titles_list.append((title, year, alt_title, short_stories))
+    titles_list.append((title, year, short_stories))
 
 # create pandas DataFrame from the titles list    
-df = pd.DataFrame(titles_list, columns=['Title', 'Year', 'Alternative_Title', 'Short_Stories'])
+df = pd.DataFrame(titles_list, columns=['Title', 'Year', 'Short_Stories'])
 
 # export DataFrame to csv
-df.to_csv('poirot_titles.csv', index=False)
+df.to_csv('poirot_titles.csv', sep=';', header=None, index=False)
 
 # get extended titles list including titles of short stories
 extended_list = []
@@ -51,8 +46,8 @@ extended_list = []
 start_tag = soup.find('span', id="Books_in_chronological_order")
 results2 = start_tag.find_all_next('li')
 
-# for each list item (tag <li>) check if it has <a> tag with attribute href
-# starting with string '/wiki/...', if it does take it's text - this is the title
+# for each list item (tag <li>) check if it has <a> tag with attribute
+# href that starts with string '/wiki/', if it does - this is the title
 for result in results2:
     try:
         ex_title = result.find('a', href=re.compile(r'^/wiki/')).text
